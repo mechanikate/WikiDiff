@@ -1,0 +1,8 @@
+<h1>WikiDiff</h1>
+<form action="/render">
+    <input onchange="arttitle.value=this.value.split(/\//g).slice(-1)[0];" type="text" placeholder="Article URL" />
+    <br />
+    <input type="text" name="article" placeholder="...or the article title" id="arttitle" />
+    <br /><br />
+    <input type="submit" value="Calculate heatmap" />
+</form>
