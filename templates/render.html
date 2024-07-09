@@ -54,6 +54,8 @@ async function fetchNewText() {
         minprev:minprevs,
         articleno:articlenos
     }));
+    console.log(request.status, request2.status);
+    if(!request.ok || !request2.ok) return "";
     document.getElementById("articletxt").innerHTML=await request.text();
     document.getElementById("percentcontroversialness").innerHTML=await request2.text();
     return request;
