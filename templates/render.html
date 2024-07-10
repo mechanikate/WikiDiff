@@ -54,12 +54,12 @@ async function fetchNewText() {
         minprev:minprevs,
         articleno:articlenos
     }));
-    console.log(request.status, request2.status);
-    if(!request.ok || !request2.ok) return "";
+    if(!request.ok || !request2.ok) { console.log("Request failed. Is the article tag blank?"); return ""; }
     document.getElementById("articletxt").innerHTML=await request.text();
     document.getElementById("percentcontroversialness").innerHTML=await request2.text();
     return request;
 }
+window.onload = fetchNewText;
 </script>
 <style>
 textarea {
