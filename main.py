@@ -1,18 +1,18 @@
 from flask import Flask, request, render_template
-import requests, collections, datetime
+import requests, collections, urllib.parse
 from typing import List
 
 app = Flask(__name__) # Get Flask ready
 cache = {} # Initialize the cache to nothing
 
-def request_url(wikibaseurl="https://en.wikipedia.org/w/api.php", pagetitle = "Python_(programming_language)", starttime="2020-02-09T02:42:57.512Z", endtime="2024-07-09T01:44:00.000Z"): # Get all the revisions (up to 10?) of a wikimedia page (by default Wikipedia)
+def request_url(wikibaseurl: str="https://en.wikipedia.org/w/api.php", pagetitle: str = "Python_(programming_language)", starttime: str="2020-02-09T02:42:57.512Z", endtime: str="2024-07-09T01:44:00.000Z"): # Get all the revisions (up to 10?) of a wikimedia page (by default Wikipedia)
     if(pagetitle in cache.keys()):
         return cache[pagetitle] # If the page title is in the cache, just return what we had there
     resp = requests.get(wikibaseurl, params={ # Otherwise, do the GET request!
         'action': 'query',
         'format': 'json',
         'prop': 'revisions',
-        'titles': pagetitle,
+        'titles': urllib.parse.unquote(pagetitle),
         'formatversion': 2,
         'rvprop': 'content',
         'rvslots': '*',
@@ -21,14 +21,13 @@ def request_url(wikibaseurl="https://en.wikipedia.org/w/api.php", pagetitle = "P
         'rvdir': 'older',
         'rvlimit': 50
     })
-    print(resp.status_code)
     if resp.status_code != 200:
         return ["Oops! Something went wrong."]*10
     rev = resp.json()["query"]["pages"][0]["revisions"] # Go through the JSON 'till we get here
     if not pagetitle in cache.keys():
         cache[pagetitle] = rev # If it's not in the cache, add it
     return rev # Return the revisions
-def compare(dataarg: List[str], start=0, end=3, minimum_prevalence=1) -> List[str]:
+def compare(dataarg: List[str], start: int=0, end: int=3, minimum_prevalence: int=1) -> List[str]:
     curr=dataarg[start].split("\n")
     for i in range(start+1,end):
         curr.extend(dataarg[i].split("\n")) # Add every revision text to one list
@@ -41,7 +40,7 @@ def controversialness(dataarg: str, dupes: List[str]) -> float:
     return max(0,int((1-len(dupes)/len(dataarg.split("\n")))*1000)/10)
 
 select_info = lambda txt: txt["slots"]["main"]["content"] # Used for getting even deeper into each revision's JSON (from request_url[i] to actual text)
-def fullparse(pagetitle,minimum_prevalence=0.25, maxarticles=3) -> List[str]: # Bring it all together!
+def fullparse(pagetitle: str,minimum_prevalence: int=1, maxarticles: int=3) -> List[str]: # Bring it all together!
     data = request_url(pagetitle=pagetitle)
     data = [select_info(i) for i in data]
     return compare(data,end=maxarticles,minimum_prevalence=minimum_prevalence)
