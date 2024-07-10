@@ -16,6 +16,7 @@ def request_url(
         return cache[
             pagetitle
         ]  # If the page title is in the cache, just return what we had there
+    print(pagetitle, urllib.parse.unquote(pagetitle))
     resp = requests.get(
         wikibaseurl,
         params={  # Otherwise, do the GET request!
@@ -79,48 +80,42 @@ def fullparse(
 def index_page():
     return render_template("index.html")  # templates/index.html
 
-
-@app.route("/w")  # https://example.com/w?article=...&minprev=...&articleno=...
-def get_common_article_text_page():
-    return "\n".join(
-        fullparse(
-            request.args.get("article"),
-            minimum_prevalence=float(request.args.get("minprev")),
-            maxarticles=int(request.args.get("articleno")),
-        )
-    )
-
-
-@app.route(
-    "/controversialness"
-)  # https://example.com/controversialness?article=...&minprev=...&articleno=...
-def controversialness_page():  # Literally just returns a percent of what amount of the text has changed over 16:07
-    if (
-        request.args.get("minprev") in ["", None]
-        or request.args.get("articleno") in ["", None]
-        or request.args.get("article") in ["", None]
-    ):
-        return "0%"
-    data = fullparse(
-        request.args.get("article"),
-        minimum_prevalence=float(request.args.get("minprev")),
-        maxarticles=int(request.args.get("articleno")),
-    )
-    return (
-        str(
-            controversialness(
-                select_info(request_url(pagetitle=request.args.get("article"))[-1]),
-                data,
-            )
-        )
-        + "%"
-    )
-
-
 @app.route("/render")  # https://example.com/render?article=... (generally)
 def render():
     return render_template("render.html")  # templates/render.html
 
-
+@app.route("/api")
+def api():
+    if(request.args.get("query")=="controversialness" or request.args.get("q")=="controversialness"): # https://example.com/api?query=controversialness&article=...&minprev=...&articleno=...
+        if (
+            request.args.get("minprev") in ["", None]
+            or request.args.get("articleno") in ["", None]
+            or request.args.get("article") in ["", None]
+        ):
+            return "0%"
+        data = fullparse(
+            request.args.get("article"),
+            minimum_prevalence=float(request.args.get("minprev")),
+            maxarticles=int(request.args.get("articleno")),
+        )
+        return (
+            str(
+                controversialness(
+                    select_info(request_url(pagetitle=request.args.get("article"))[-1]),
+                    data,
+                )
+            )
+            + "%"
+        )
+    elif(request.args.get("query")=="text" or request.args.get("q")=="text"): # https://example.com/api?query=text&article=...&minprev=...&articleno=...
+        return "\n".join(
+            fullparse(
+                request.args.get("article"),
+                minimum_prevalence=float(request.args.get("minprev")),
+                maxarticles=int(request.args.get("articleno")),
+            )
+        )
+    else:
+        return ""
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)  # Run it!

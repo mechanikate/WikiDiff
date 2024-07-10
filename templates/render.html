@@ -44,12 +44,14 @@ async function fetchNewText() {
     const articlenos = document.getElementById("articleno").value;
     const minprevs = document.getElementById("minprevalence").value;
     const articletitle = params.get("article");
-    const request = await fetch("/w?"+new URLSearchParams({
+    const request = await fetch("/api?"+new URLSearchParams({
+		query:"text",
         article:articletitle,
         minprev:minprevs,
         articleno:articlenos
     }));
-    const request2 = await fetch("/controversialness?"+new URLSearchParams({
+    const request2 = await fetch("/api?"+new URLSearchParams({
+		query:"controversialness",
         article:articletitle,
         minprev:minprevs,
         articleno:articlenos
