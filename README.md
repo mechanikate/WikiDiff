@@ -1,4 +1,4 @@
-<img src="https://github.com/mechanikate/WikiDiff/blob/main/README-assets/img/wikidiff-logo.png?raw=true" height="100" />
+<h1 align="center"><img src="https://github.com/mechanikate/WikiDiff/blob/main/README-assets/img/wikidiff-logo.png?raw=true" height="100" /></h1>
 
 WikiDiff checks controversial-ness and differences between revisions of Wikipedia articles with a simple(ish) web interface.
 ## Installation
